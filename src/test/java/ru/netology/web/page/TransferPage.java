@@ -1,38 +1,39 @@
 package ru.netology.web.page;
 
-import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
+import ru.netology.web.data.DataHelper;
 
+import java.time.Duration;
+
+import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.Selectors.withText;
 import static com.codeborne.selenide.Selenide.$;
 
-public class MoneyTransfer {
+public class TransferPage {
 
-    private SelenideElement transferPage = $(withText("Пополнение карты"));
-    private SelenideElement transferAmount = $("[data-test-id=amount] input");
-    private SelenideElement transferFrom = $("[data-test-id=from] input");
-    private SelenideElement transferButton = $(byText("Пополнить"));
-    private SelenideElement errorMessage = $(withText("Ошибка"));
+    private final SelenideElement transferButton = $("[data-test-id='action-transfer']");
+    private final SelenideElement amountInput = $("[data-test-id='amount'] input");
+    private final SelenideElement fromInput = $("[data-test-id='from'] input");
+    private final SelenideElement transferHead = $(byText("Пополнение карты"));
+    private final SelenideElement errorMessage = $("[data-test-id='error-notification']");
 
-    public void moneyTransferVisible() {
-        transferPage.shouldBe(Condition.visible);
+    public TransferPage() {
+        transferHead.shouldBe(visible);
     }
 
-    public void setTransferAmount(int sum) {
-        transferAmount.setValue(String.valueOf(sum));
+    public DashboardPage makeValidTransfer(String amountToTransfer, DataHelper.CardInfo cardInfo) {
+        makeTransfer(amountToTransfer, cardInfo);
+        return new DashboardPage();
     }
 
-    public void setFrom(String numberCard) {
-        transferFrom.setValue(numberCard);
-    }
-
-    public void doTransfer() {
+    public void makeTransfer(String amountToTransfer, DataHelper.CardInfo cardInfo) {
+        amountInput.setValue(amountToTransfer);
+        fromInput.setValue(cardInfo.getCardNumber());
         transferButton.click();
     }
 
-    public void errorTransfer() {
-        errorMessage.shouldBe(Condition.visible);
+    public void findErrorMessage(String expectedText) {
+        errorMessage.shouldHave(text(expectedText), Duration.ofSeconds(15)).shouldBe(visible);
     }
-
 }
